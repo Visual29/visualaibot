@@ -1,11 +1,12 @@
 import asyncio
+import os
 from aiogram import Bot, Dispatcher, types
 from groq import Groq
 
-# --- НАСТРОЙКИ ---
-TOKEN = "8227695995:AAE-RhJFYKz_nRLe97Q3r_ghaOJaQHjOBqE"
-GROQ_KEY = "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"
-MY_ID = 5351067845  # Твой ID из @userinfobot
+# --- НАСТРОЙКИ (Берем из Render Environment Variables) ---
+TOKEN = os.getenv("TOKEN")
+GROQ_KEY = os.getenv("GROQ_KEY")
+MY_ID = int(os.getenv("MY_ID", "0"))
 
 client = Groq(api_key=GROQ_KEY)
 bot = Bot(token=TOKEN)
@@ -13,34 +14,36 @@ dp = Dispatcher()
 
 SYSTEM_PROMPT = """
 Ты — умный ИИ-ассистент психолога Елены. 
-Твоя цель: помогать клиентам и собирать их контакты.
-1. Будь вежливым и эмпатичным.
-2. Цена сессии: 5000 руб. Темы: выгорание, отношения, стресс.
-3. Если клиент проявляет интерес или спрашивает про запись, ОБЯЗАТЕЛЬНО попроси его номер телефона.
-4. Отвечай кратко (до 3-4 предложений).
+Твоя цель: отвечать на вопросы клиентов и записывать их на консультацию.
+1. Будь вежливым и профессиональным.
+2. Цена сессии: 5000 руб. Работает с выгоранием и стрессом.
+3. Если клиент спрашивает про запись или цену, ОБЯЗАТЕЛЬНО попроси его номер телефона.
+4. Отвечай кратко (2-3 предложения).
 """
 
 @dp.message()
 async def ai_answer(message: types.Message):
-    # Запрос к бесплатной нейросети Llama 3
-    completion = client.chat.completions.create(
-        model="llama-3.3-70b-versatile",
-        messages=[
-            {"role": "system", "content": SYSTEM_PROMPT},
-            {"role": "user", "content": message.text}
-        ]
-    )
-    
-    answer = completion.choices[0].message.content
-    await message.answer(answer)
+    try:
+        # Запрос к нейросети Llama 3.3
+        completion = client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=[
+                {"role": "system", "content": SYSTEM_PROMPT},
+                {"role": "user", "content": message.text}
+            ]
+        )
+        
+        answer = completion.choices.message.content
+        await message.answer(answer)
 
-    # Уведомление тебе, если клиент оставил номер (простая проверка на цифры)
-    if any(char.isdigit() for char in message.text) and len(message.text) > 7:
-        await bot.send_message(MY_ID, f"🔥 ЛИД ОСТАВИЛ НОМЕР:\n{message.text}\nОт: @{message.from_user.username}")
+        # Уведомление владельцу, если в сообщении есть цифры (номер телефона)
+        if any(char.isdigit() for char in message.text) and len(message.text) > 8:
+            await bot.send_message(MY_ID, f"🔥 НОВЫЙ ЛИД ОСТАВИЛ НОМЕР:\n{message.text}\nОт: @{message.from_user.username}")
+    except Exception as e:
+        print(f"Ошибка: {e}")
 
 async def main():
     await dp.start_polling(bot)
 
 if __name__ == "__main__":
     asyncio.run(main())
-
