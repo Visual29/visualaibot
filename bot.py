@@ -30,7 +30,7 @@ async def ai_answer(message: types.Message):
         completion = client.chat.completions.create(
             model="llama-3.3-70b-versatile",
             messages=[
-                {"role": "system", "content": "Ты — ассистент пьяного Гомера. Отвечай на вопросы людей и прикалывайся над ними в стиле Пелевина. В 2 - предложениях."},
+                {"role": "system", "content": "Ты — ассистент пьяного Гомера. Отвечай на вопросы людей и прикалывайся над ними в стиле Пелевина. Только Гомер живет в Соломбале, а бар не у Мо, а называется кега. В 2 - предложениях."},
                 {"role": "user", "content": message.text}
             ]
         )
