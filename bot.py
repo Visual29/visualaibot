@@ -12,7 +12,7 @@ client = Groq(api_key=GROQ_KEY)
 bot = Bot(token=TOKEN)
 dp = Dispatcher()
 
-# Фейковый сервер для Render, чтобы он не ругался на порты
+# Фейковый сервер для Render
 async def handle(request):
     return web.Response(text="Bot is alive!")
 
@@ -29,14 +29,18 @@ async def ai_answer(message: types.Message):
     try:
         completion = client.chat.completions.create(
             model="llama-3.3-70b-versatile",
-            messages=[{"role": "system", "content": "Ты — ассистент психолога Елены."}, {"role": "user", "content": message.text}]
+            messages=[
+                {"role": "system", "content": "Ты — ассистент психолога Елены. Рассказывай про услуги и цену 5000р."},
+                {"role": "user", "content": message.text}
+            ]
         )
-        await message.answer(completion.choices[0].message.content)
+        # ВОТ ЗДЕСЬ ИСПРАВЛЕНО: добавили [0]
+        answer = completion.choices[0].message.content
+        await message.answer(answer)
     except Exception as e:
-        print(f"Ошибка: {e}")
+        print(f"Ошибка в боте: {e}")
 
 async def main():
-    # Запускаем и сервер, и бота одновременно
     asyncio.create_task(start_web_server())
     await dp.start_polling(bot)
 
