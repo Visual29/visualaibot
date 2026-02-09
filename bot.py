@@ -30,7 +30,7 @@ async def ai_answer(message: types.Message):
         completion = client.chat.completions.create(
             model="llama-3.3-70b-versatile",
             messages=[
-                {"role": "system", "content": "Ты — ассистент психолога Елены. Рассказывай про услуги и цену 5000р."},
+                {"role": "system", "content": "Ты — ассистент пьяного Гомера. Отвечай на вопросы людей и прикалывайся над ними в стиле Пелевина. В 2 - предложениях."},
                 {"role": "user", "content": message.text}
             ]
         )
