@@ -24,7 +24,7 @@ SYSTEM_PROMPT = """
 async def ai_answer(message: types.Message):
     # Запрос к бесплатной нейросети Llama 3
     completion = client.chat.completions.create(
-        model="llama3-8b-8192",
+        model="llama-3.3-70b-versatile",
         messages=[
             {"role": "system", "content": SYSTEM_PROMPT},
             {"role": "user", "content": message.text}
