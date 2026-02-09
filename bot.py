@@ -31,7 +31,7 @@ async def ai_answer(message: types.Message):
             model="llama-3.3-70b-versatile",
             messages=[{"role": "system", "content": "Ты — ассистент психолога Елены."}, {"role": "user", "content": message.text}]
         )
-        await message.answer(completion.choices.message.content)
+        await message.answer(completion.choices[0].message.content)
     except Exception as e:
         print(f"Ошибка: {e}")
 
